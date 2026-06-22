@@ -1,2 +1,9 @@
-# estate-mapper
-axentx product · An agent that auto-discovers VMs/services across mixed legacy estates, infers real usage and likely owners from network/telemetry/auth logs, and emits a ranked safe-to-decommission / migration-risk re
+# Estate Mapper
+Estate Mapper is a tool for generating ranked reports for safe decommissioning and migration of assets.
+
+## Usage
+1. Create an instance of the `EstateMapper` class, passing in a list of `Asset` objects.
+2. Call the `generate_report` method, passing in the desired scenario ("decommissioning", "migration", or "consolidation").
+3. Call the `rank_reports` method, passing in a list of reports.
+
+## Example
