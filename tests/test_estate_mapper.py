@@ -1,55 +1,41 @@
-import json
-from estate_mapper import EstateMapper, Asset
+import pytest
+from estate_mapper import collect_syslog_entries, parse_authentication_logs, identify_dormant_services, LogEntry
+from datetime import datetime, timedelta
 
-def test_generate_report_decommissioning():
-    assets = [
-        Asset("VM1", "VM", 5),
-        Asset("VM2", "VM", 60),
+@pytest.fixture
+def log_entries():
+    return [
+        LogEntry(datetime.now() - timedelta(days=1), "service1", "user1"),
+        LogEntry(datetime.now() - timedelta(days=2), "service2", "user2"),
+        LogEntry(datetime.now() - timedelta(days=30), "service3", "user3"),
     ]
-    estate_mapper = EstateMapper(assets)
-    report = estate_mapper.generate_report("decommissioning")
-    assert json.loads(report) == ["Decommission VM1 (VM)"]
 
-def test_generate_report_migration():
-    assets = [
-        Asset("VM1", "VM", 5),
-        Asset("VM2", "VM", 60),
-    ]
-    estate_mapper = EstateMapper(assets)
-    report = estate_mapper.generate_report("migration")
-    assert json.loads(report) == ["Migrate VM2 (VM)"]
+def test_collect_syslog_entries(log_entries):
+    collected_entries = collect_syslog_entries(30)
+    assert len(collected_entries) == 3
 
-def test_generate_report_consolidation():
-    assets = [
-        Asset("VM1", "VM", 5),
-        Asset("VM2", "VM", 60),
-    ]
-    estate_mapper = EstateMapper(assets)
-    report = estate_mapper.generate_report("consolidation")
-    assert json.loads(report) == ["Consolidate VM1 (VM)"]
+def test_parse_authentication_logs(log_entries):
+    active_users = parse_authentication_logs(log_entries)
+    assert len(active_users) == 3
+    assert "user1" in active_users
+    assert "user2" in active_users
+    assert "user3" in active_users
 
-def test_rank_reports():
-    assets = [
-        Asset("VM1", "VM", 5),
-        Asset("VM2", "VM", 60),
-        Asset("Service1", "Service", 20),
-        Asset("Service2", "Service", 80),
-    ]
-    estate_mapper = EstateMapper(assets)
-    decommissioning_report = estate_mapper.generate_report("decommissioning")
-    migration_report = estate_mapper.generate_report("migration")
-    consolidation_report = estate_mapper.generate_report("consolidation")
-    reports = [decommissioning_report, migration_report, consolidation_report]
-    ranked_reports = estate_mapper.rank_reports(reports)
-    assert len(ranked_reports) == 3
+def test_identify_dormant_services(log_entries):
+    dormant_services = identify_dormant_services(log_entries)
+    assert len(dormant_services) == 1
+    assert "service3" in dormant_services
 
-def test_invalid_scenario():
-    assets = [
-        Asset("VM1", "VM", 5),
-    ]
-    estate_mapper = EstateMapper(assets)
-    try:
-        estate_mapper.generate_report("invalid")
-        assert False
-    except ValueError:
-        assert True
+def test_collect_syslog_entries_edge_case():
+    collected_entries = collect_syslog_entries(0)
+    assert len(collected_entries) == 0
+
+def test_parse_authentication_logs_edge_case():
+    log_entries = []
+    active_users = parse_authentication_logs(log_entries)
+    assert len(active_users) == 0
+
+def test_identify_dormant_services_edge_case():
+    log_entries = []
+    dormant_services = identify_dormant_services(log_entries)
+    assert len(dormant_services) == 0

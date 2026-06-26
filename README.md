@@ -1,9 +1,8 @@
 # Estate Mapper
-Estate Mapper is a tool for generating ranked reports for safe decommissioning and migration of assets.
+Estate Mapper is a tool for collecting network/auth logs to infer service usage patterns and identify dormant systems.
 
 ## Usage
-1. Create an instance of the `EstateMapper` class, passing in a list of `Asset` objects.
-2. Call the `generate_report` method, passing in the desired scenario ("decommissioning", "migration", or "consolidation").
-3. Call the `rank_reports` method, passing in a list of reports.
+To use Estate Mapper, simply run the `estate_mapper.py` script with the `--days` argument to specify the number of days to collect syslog entries.
 
-## Example
+## Testing
+To run the tests, use the `pytest` command.
